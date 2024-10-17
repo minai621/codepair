@@ -59,7 +59,7 @@ jobs:
       - name: Install NSIS 3.0.4.1
         if: runner.os == 'Windows'
         run: |
-          Invoke-WebRequest -Uri https://downloads.sourceforge.net/project/nsis/NSIS%203/3.0.4/nsis-3.0.4-setup.exe -OutFile nsis-3.0.4-setup.exe
+          Invoke-WebRequest -Uri https://sourceforge.net/projects/nsis/files/NSIS%203/3.04/nsis-3.04-setup.exe
           Start-Process nsis-3.0.4-setup.exe -ArgumentList '/S' -Wait
 
       - name: Check NSIS version
