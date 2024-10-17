@@ -21,9 +21,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
 
-      - name: Clear Electron Builder cache
-        if: runner.os == 'Windows'
-        run: Remove-Item -Recurse -Force $env:USERPROFILE\.cache\electron-builder
+      #   - name: Clear Electron Builder cache
+      #     if: runner.os == 'Windows'
+      #     run: Remove-Item -Recurse -Force $env:USERPROFILE\.cache\electron-builder
 
       - name: Install NSIS on Windows
         if: runner.os == 'Windows'
