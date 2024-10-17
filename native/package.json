@@ -4,6 +4,10 @@
   "main": "dist/main.js",
   "description": "Codepair Native",
   "author": "yorkie-team",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yorkie-team/codepair/issues"
+  },
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc src/main.ts --outDir dist",
