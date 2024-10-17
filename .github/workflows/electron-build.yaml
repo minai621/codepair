@@ -53,6 +53,7 @@ jobs:
       #       echo $env:PATH
 
       - name: Check NSIS version
+        if: runner.os == 'Windows'
         run: makensis -VERSION
 
       - name: Build/release Electron app
