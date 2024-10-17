@@ -36,11 +36,13 @@ jobs:
 
       # NSIS 설치 경로를 PATH에 추가
       - name: Install NSIS
+        if: runner.os == 'Windows'
         run: |
           choco install nsis -y
           echo "C:\Program Files (x86)\NSIS" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Set NSIS_ROOT
+        if: runner.os == 'Windows'
         run: echo "NSIS_ROOT=C:\Program Files (x86)\NSIS" >> $env:GITHUB_ENV
 
       # NSIS 설치 확인
