@@ -27,15 +27,19 @@ jobs:
         continue-on-error: true
 
       # NSIS 설치 경로를 PATH에 추가
-      - name: Install NSIS
+
+      - name: Download and Install NSIS 3.0.4.1
         if: runner.os == 'Windows'
         run: |
-          choco install nsis -y
-          echo "C:\Program Files (x86)\NSIS" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          $nsisUrl = "https://github.com/electron-userland/electron-builder-binaries/releases/download/nsis-3.0.4.1/nsis-3.0.4.1.7z"
+          $nsisPath = "$env:TEMP\nsis-3.0.4.1.7z"
+          Invoke-WebRequest -Uri $nsisUrl -OutFile $nsisPath
+          7z x $nsisPath -o"$env:ProgramFiles (x86)\nsis-3.0.4.1" -y
+          echo "$env:ProgramFiles (x86)\nsis-3.0.4.1" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        continue-on-error: true
 
-      - name: Set NSIS_ROOT
-        if: runner.os == 'Windows'
-        run: echo "NSIS_ROOT=C:\Program Files (x86)\NSIS" >> $env:GITHUB_ENV
+      - name: Set NSIS_ROOT for 3.0.4.1
+        run: echo "NSIS_ROOT=$env:ProgramFiles (x86)\nsis-3.0.4.1" >> $env:GITHUB_ENV
 
       # NSIS 설치 확인
       - name: Verify NSIS Installation
