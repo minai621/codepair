@@ -21,6 +21,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
 
+      - name: Install NSIS on Windows
+        if: runner.os == 'Windows'
+        run: choco install nsis
+
       - name: Build/release Electron app
         uses: minai621/action-electron-builder@v1
         with:
