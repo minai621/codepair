@@ -63,9 +63,6 @@ jobs:
           Start-Process nsis-3.0.4-setup.exe -ArgumentList '/S' -Wait
 
       - name: Check NSIS version
-        run: makensis -VERSION
-
-      - name: Check NSIS version
         if: runner.os == 'Windows'
         run: makensis -VERSION
 
