@@ -21,20 +21,25 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
 
-      #   - name: Clear Electron Builder cache
-      #     if: runner.os == 'Windows'
-      #     run: Remove-Item -Recurse -Force $env:USERPROFILE\.cache\electron-builder
+      # Windows 환경에서 Electron-builder 캐시를 강제로 삭제
+      - name: Clear Electron Builder cache
+        if: runner.os == 'Windows'
+        run: Remove-Item -Recurse -Force $env:USERPROFILE\.cache\electron-builder
+        continue-on-error: true
 
+      # Windows 환경에서 NSIS 강제로 재설치
       - name: Force reinstall NSIS on Windows
         if: runner.os == 'Windows'
         run: choco install nsis --force -y
 
+      # NSIS 설치 경로를 PATH에 추가
       - name: Add NSIS to PATH
         if: runner.os == 'Windows'
         run: |
           echo "C:\\Program Files (x86)\\NSIS" >> $GITHUB_PATH
           echo "C:\\Program Files (x86)\\NSIS\\Bin" >> $GITHUB_PATH
 
+      # NSIS 설치 확인
       - name: Verify NSIS Installation
         if: runner.os == 'Windows'
         run: where makensis
