@@ -34,9 +34,7 @@ jobs:
         run: makensis -VERSION
 
       - name: Clear Electron Builder cache
-        run: |
-          rm -rf ~/.cache/electron-builder
-          rm -rf ~/.cache/electron
+        run: Remove-Item -Recurse -Force $env:USERPROFILE\.cache\electron-builder
 
       - name: Build/release Electron app
         uses: minai621/action-electron-builder@v1
