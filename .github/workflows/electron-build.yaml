@@ -25,7 +25,7 @@ jobs:
         uses: minai621/action-electron-builder@v1
         with:
           package_root: native
-          build_script_name: build:app
+          build_script_name: release
           # GitHub token, automatically provided to the action
           # (No need to define this secret in the repo settings)
           github_token: ${{ secrets.github_token }}
