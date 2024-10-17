@@ -35,7 +35,7 @@ jobs:
 
       - name: Verify NSIS Installation
         if: runner.os == 'Windows'
-        run: makensis -VERSION
+        run: where makensis
 
       - name: Build/release Electron app
         uses: minai621/action-electron-builder@v1
