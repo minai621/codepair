@@ -52,6 +52,19 @@ jobs:
       #       Get-ChildItem "$env:ProgramFiles (x86)\nsis-3.0.4.1" -Recurse
       #       echo $env:PATH
 
+      - name: Uninstall existing NSIS
+        if: runner.os == 'Windows'
+        run: choco uninstall nsis -y
+
+      - name: Install NSIS 3.0.4.1
+        if: runner.os == 'Windows'
+        run: |
+          Invoke-WebRequest -Uri https://downloads.sourceforge.net/project/nsis/NSIS%203/3.0.4/nsis-3.0.4-setup.exe -OutFile nsis-3.0.4-setup.exe
+          Start-Process nsis-3.0.4-setup.exe -ArgumentList '/S' -Wait
+
+      - name: Check NSIS version
+        run: makensis -VERSION
+
       - name: Check NSIS version
         if: runner.os == 'Windows'
         run: makensis -VERSION
