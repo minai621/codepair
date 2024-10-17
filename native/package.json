@@ -1,0 +1,43 @@
+{
+  "name": "@codepair/native",
+  "version": "1.0.0",
+  "main": "dist/main.js",
+  "description": "Codepair Native",
+  "author": "yorkie-team",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "tsc src/main.ts --outDir dist",
+    "start": "pnpm run build && cross-env NODE_ENV=production pnpx electron dist/main.js",
+    "start:dev": "pnpm run start:codepair:dev && pnpm run build && cross-env NODE_ENV=development bunx electron dist/main.js",
+    "start:codepair:dev": "cd ../frontend && bun run dev & ",
+    "build:app": "pnpm run build && electron-builder"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.6",
+    "cross-env": "^7.0.3",
+    "electron": "^33.0.1",
+    "electron-builder": "^25.1.8",
+    "typescript": "^5.3.3"
+  },
+  "build": {
+    "appId": "com.example.codepair",
+    "productName": "codepair",
+    "files": [
+      "dist/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}

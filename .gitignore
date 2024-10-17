@@ -44,3 +44,7 @@ dist-ssr/
 # Tests
 coverage/
 .nyc_output/
+
+# native
+native/frontend
+native/release
