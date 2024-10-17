@@ -28,9 +28,9 @@ jobs:
         continue-on-error: true
 
       # Windows 환경에서 NSIS 강제로 재설치
-      - name: Force reinstall NSIS on Windows
-        if: runner.os == 'Windows'
-        run: choco install nsis --force -y
+      #   - name: Force reinstall NSIS on Windows
+      #     if: runner.os == 'Windows'
+      #     run: choco install nsis --force -y
 
       # NSIS 설치 경로를 PATH에 추가
       - name: Add NSIS to PATH
