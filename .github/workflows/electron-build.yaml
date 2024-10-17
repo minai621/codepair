@@ -25,13 +25,15 @@ jobs:
       #     if: runner.os == 'Windows'
       #     run: Remove-Item -Recurse -Force $env:USERPROFILE\.cache\electron-builder
 
-      - name: Install NSIS on Windows
+      - name: Force reinstall NSIS on Windows
         if: runner.os == 'Windows'
-        run: choco install nsis -y
+        run: choco install nsis --force -y
 
       - name: Add NSIS to PATH
         if: runner.os == 'Windows'
-        run: echo "C:\\Program Files (x86)\\NSIS" >> $GITHUB_PATH
+        run: |
+          echo "C:\\Program Files (x86)\\NSIS" >> $GITHUB_PATH
+          echo "C:\\Program Files (x86)\\NSIS\\Bin" >> $GITHUB_PATH
 
       - name: Verify NSIS Installation
         if: runner.os == 'Windows'
