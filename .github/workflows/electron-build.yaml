@@ -26,14 +26,6 @@ jobs:
         run: Remove-Item -Recurse -Force $env:USERPROFILE\.cache\electron-builder
         continue-on-error: true
 
-      - name: Download and install NSIS manually
-        if: runner.os == 'Windows'
-        run: |
-          Invoke-WebRequest -Uri "https://nsis.sourceforge.io/mediawiki/images/e/e3/NSIS-3.08-setup.exe" -OutFile "nsis-installer.exe"
-          Start-Process -Wait -FilePath "nsis-installer.exe" -ArgumentList "/S"
-          echo "C:\\Program Files (x86)\\NSIS" >> $GITHUB_PATH
-          echo "C:\\Program Files (x86)\\NSIS\\Bin" >> $GITHUB_PATH
-
       # NSIS 설치 경로를 PATH에 추가
       - name: Install NSIS
         if: runner.os == 'Windows'
