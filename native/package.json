@@ -14,7 +14,7 @@
     "start": "pnpm run build && cross-env NODE_ENV=production pnpx electron dist/main.js",
     "start:dev": "pnpm run start:codepair:dev && pnpm run build && cross-env NODE_ENV=development pnpx electron dist/main.js",
     "start:codepair:dev": "cd ../frontend && Pnpm run dev & ",
-    "build:app": "pnpm run build && pnpx electron-builder",
+    "electron-builder": "pnpm run build && pnpx electron-builder",
     "release": "pnpm run build && pnpx electron-builder --publish always"
   },
   "devDependencies": {
