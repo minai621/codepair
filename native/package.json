@@ -12,9 +12,10 @@
   "scripts": {
     "build": "tsc src/main.ts --outDir dist",
     "start": "pnpm run build && cross-env NODE_ENV=production pnpx electron dist/main.js",
-    "start:dev": "pnpm run start:codepair:dev && pnpm run build && cross-env NODE_ENV=development bunx electron dist/main.js",
-    "start:codepair:dev": "cd ../frontend && bun run dev & ",
-    "build:app": "pnpm run build && electron-builder"
+    "start:dev": "pnpm run start:codepair:dev && pnpm run build && cross-env NODE_ENV=development pnpx electron dist/main.js",
+    "start:codepair:dev": "cd ../frontend && Pnpm run dev & ",
+    "build:app": "pnpm run build && pnpx electron-builder",
+    "release": "pnpm run build && pnpx electron-builder --publish always"
   },
   "devDependencies": {
     "@types/node": "^22.7.6",
@@ -24,9 +25,7 @@
     "typescript": "^5.3.3"
   },
   "build": {
-    "publish": {
-      "provider": "github"
-    },
+    "publish": "always",
     "appId": "com.example.codepair",
     "productName": "codepair",
     "files": [
