@@ -1,5 +1,6 @@
 name: electron-build
 on: push
+
 jobs:
   release:
     runs-on: ${{ matrix.os }}
@@ -23,10 +24,10 @@ jobs:
 
       - name: Clear Electron Builder cache
         if: runner.os == 'Windows'
-        run: Remove-Item -Recurse -Force $env:USERPROFILE\.cache\electron-builder
+        run: |
+          Remove-Item -Path "$env:USERPROFILE\AppData\Local\electron-builder\Cache" -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path "$env:LOCALAPPDATA\electron-builder\Cache" -Recurse -Force -ErrorAction SilentlyContinue
         continue-on-error: true
-
-      # NSIS 설치 경로를 PATH에 추가
 
       - name: Download and Install NSIS 3.0.4.1
         if: runner.os == 'Windows'
@@ -36,20 +37,28 @@ jobs:
           Invoke-WebRequest -Uri $nsisUrl -OutFile $nsisPath
           7z x $nsisPath -o"$env:ProgramFiles (x86)\nsis-3.0.4.1" -y
           echo "$env:ProgramFiles (x86)\nsis-3.0.4.1" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-        continue-on-error: true
 
-      - name: Set NSIS_ROOT for 3.0.4.1
-        run: echo "NSIS_ROOT=$env:ProgramFiles (x86)\nsis-3.0.4.1" >> $env:GITHUB_ENV
+      - name: Set NSIS path and environment variables
+        if: runner.os == 'Windows'
+        run: |
+          echo "NSIS_ROOT=$env:ProgramFiles (x86)\nsis-3.0.4.1" >> $env:GITHUB_ENV
+          echo "ELECTRON_BUILDER_NSIS_DIR=$env:ProgramFiles (x86)\nsis-3.0.4.1" >> $env:GITHUB_ENV
+          echo "PATH=$env:ProgramFiles (x86)\nsis-3.0.4.1;$env:PATH" >> $env:GITHUB_ENV
 
-      # NSIS 설치 확인
       - name: Verify NSIS Installation
         if: runner.os == 'Windows'
-        run: where makensis
+        run: |
+          Get-Command makensis
+          Get-ChildItem "$env:ProgramFiles (x86)\nsis-3.0.4.1" -Recurse
+          echo $env:PATH
 
       - name: Build/release Electron app
         uses: minai621/action-electron-builder@v1
+        env:
+          DEBUG: electron-builder
         with:
           package_root: native
           build_script_name: release
           github_token: ${{ secrets.github_token }}
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          args: "--win nsis"
