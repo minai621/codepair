@@ -45,6 +45,10 @@
     "win": {
       "target": "nsis"
     },
+    "nsis": {
+      "unicode": true,
+      "executable": "C:\\Program Files (x86)\\NSIS\\Bin\\makensis.exe"
+    },
     "linux": {
       "target": "AppImage"
     }
