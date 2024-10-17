@@ -24,6 +24,9 @@
     "typescript": "^5.3.3"
   },
   "build": {
+    "publish": {
+      "provider": "github"
+    },
     "appId": "com.example.codepair",
     "productName": "codepair",
     "files": [
