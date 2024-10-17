@@ -22,35 +22,38 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
 
-      - name: Clear Electron Builder cache
-        if: runner.os == 'Windows'
-        run: |
-          Remove-Item -Path "$env:USERPROFILE\AppData\Local\electron-builder\Cache" -Recurse -Force -ErrorAction SilentlyContinue
-          Remove-Item -Path "$env:LOCALAPPDATA\electron-builder\Cache" -Recurse -Force -ErrorAction SilentlyContinue
-        continue-on-error: true
+      #   - name: Clear Electron Builder cache
+      #     if: runner.os == 'Windows'
+      #     run: |
+      #       Remove-Item -Path "$env:USERPROFILE\AppData\Local\electron-builder\Cache" -Recurse -Force -ErrorAction SilentlyContinue
+      #       Remove-Item -Path "$env:LOCALAPPDATA\electron-builder\Cache" -Recurse -Force -ErrorAction SilentlyContinue
+      #     continue-on-error: true
 
-      - name: Download and Install NSIS 3.0.4.1
-        if: runner.os == 'Windows'
-        run: |
-          $nsisUrl = "https://github.com/electron-userland/electron-builder-binaries/releases/download/nsis-3.0.4.1/nsis-3.0.4.1.7z"
-          $nsisPath = "$env:TEMP\nsis-3.0.4.1.7z"
-          Invoke-WebRequest -Uri $nsisUrl -OutFile $nsisPath
-          7z x $nsisPath -o"$env:ProgramFiles (x86)\nsis-3.0.4.1" -y
-          echo "$env:ProgramFiles (x86)\nsis-3.0.4.1" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      #   - name: Download and Install NSIS 3.0.4.1
+      #     if: runner.os == 'Windows'
+      #     run: |
+      #       $nsisUrl = "https://github.com/electron-userland/electron-builder-binaries/releases/download/nsis-3.0.4.1/nsis-3.0.4.1.7z"
+      #       $nsisPath = "$env:TEMP\nsis-3.0.4.1.7z"
+      #       Invoke-WebRequest -Uri $nsisUrl -OutFile $nsisPath
+      #       7z x $nsisPath -o"$env:ProgramFiles (x86)\nsis-3.0.4.1" -y
+      #       echo "$env:ProgramFiles (x86)\nsis-3.0.4.1" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-      - name: Set NSIS path and environment variables
-        if: runner.os == 'Windows'
-        run: |
-          echo "NSIS_ROOT=$env:ProgramFiles (x86)\nsis-3.0.4.1" >> $env:GITHUB_ENV
-          echo "ELECTRON_BUILDER_NSIS_DIR=$env:ProgramFiles (x86)\nsis-3.0.4.1" >> $env:GITHUB_ENV
-          echo "PATH=$env:ProgramFiles (x86)\nsis-3.0.4.1;$env:PATH" >> $env:GITHUB_ENV
+      #   - name: Set NSIS path and environment variables
+      #     if: runner.os == 'Windows'
+      #     run: |
+      #       echo "NSIS_ROOT=$env:ProgramFiles (x86)\nsis-3.0.4.1" >> $env:GITHUB_ENV
+      #       echo "ELECTRON_BUILDER_NSIS_DIR=$env:ProgramFiles (x86)\nsis-3.0.4.1" >> $env:GITHUB_ENV
+      #       echo "PATH=$env:ProgramFiles (x86)\nsis-3.0.4.1;$env:PATH" >> $env:GITHUB_ENV
 
-      - name: Verify NSIS Installation
-        if: runner.os == 'Windows'
-        run: |
-          Get-Command makensis
-          Get-ChildItem "$env:ProgramFiles (x86)\nsis-3.0.4.1" -Recurse
-          echo $env:PATH
+      #   - name: Verify NSIS Installation
+      #     if: runner.os == 'Windows'
+      #     run: |
+      #       Get-Command makensis
+      #       Get-ChildItem "$env:ProgramFiles (x86)\nsis-3.0.4.1" -Recurse
+      #       echo $env:PATH
+
+      - name: Check NSIS version
+        run: makensis -VERSION
 
       - name: Build/release Electron app
         uses: minai621/action-electron-builder@v1
