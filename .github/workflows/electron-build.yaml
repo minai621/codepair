@@ -27,7 +27,7 @@ jobs:
 
       - name: Install NSIS on Windows
         if: runner.os == 'Windows'
-        run: choco install nsis
+        run: choco install nsis -y
 
       - name: Add NSIS to PATH
         if: runner.os == 'Windows'
