@@ -29,7 +29,7 @@ jobs:
       - name: Install NSIS (Nullsoft Scriptable Install System)
         if: runner.os == 'Windows'
         run: |
-          choco install nsis --version=3.0.4.1
+          choco install nsis --version=3.0.4.1 --allow-downgrade
 
       - name: Add NSIS to PATH
         if: runner.os == 'Windows'
