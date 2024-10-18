@@ -34,7 +34,6 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           choco install nsis --version=3.0.4.1 --allow-downgrade
-          --allow-downgrade
 
       - name: Add NSIS to PATH
         if: runner.os == 'Windows'
