@@ -17,26 +17,45 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: yarn
 
-      - name: Enable Corepack
-        run: corepack enable
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.4.0
 
-      - name: Prepare Yarn and pnpm with Corepack
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
         run: |
-          corepack prepare yarn@1.22.22 --activate
-          corepack prepare pnpm@9.4.0 --activate
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
-      - name: Install dependencies in native folder
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build native project
         working-directory: ./native
-        run: yarn install
+        run: pnpm run build
+
+      - name: Deploy native project
+        working-directory: ./native
+        run: pnpm deploy --prod ./standalone-native
+
+      - name: Prepare for electron-builder
+        working-directory: ./native/standalone-native
+        run: |
+          cp ../../package.json .
+          pnpm install --prod
 
       - name: Build/release Electron app
-        uses: samuelmeuli/action-electron-builder@v1
         env:
-          DEBUG: electron-builder
-        with:
-          package_root: native
-          build_script_name: release
-          github_token: ${{ secrets.github_token }}
-          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          GH_TOKEN: ${{ secrets.github_token }}
+        working-directory: ./native/standalone-native
+        run: pnpm electron-builder --publish always
