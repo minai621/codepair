@@ -6,8 +6,8 @@ on:
       - "**"
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: windows-latest
     strategy:
       matrix:
         node-version: [18.x]
@@ -23,15 +23,17 @@ jobs:
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 9.4.0
 
-      - name: Install Wine
+      - name: Install NSIS
         run: |
-          sudo dpkg --add-architecture i386
-          sudo apt-get update
-          sudo apt-get install -y software-properties-common
-          sudo apt-add-repository 'deb https://dl.winehq.org/wine-builds/ubuntu/ focal main'
-          sudo apt-get update
-          sudo apt-get install -y --install-recommends winehq-stable
+          $url = "https://sourceforge.net/projects/nsis/files/NSIS%203/3.04/nsis-3.04.zip/download"
+          $output = "$env:TEMP\nsis-3.04.zip"
+          Invoke-WebRequest -Uri $url -OutFile $output
+          Expand-Archive -Path $output -DestinationPath "C:\Program Files (x86)\NSIS" -Force
+          echo "C:\Program Files (x86)\NSIS" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        shell: pwsh
 
       - name: Install Dependencies
         run: pnpm install --prefer-offline --no-frozen-lockfile
@@ -43,9 +45,9 @@ jobs:
 
       - name: Create NSIS Installer
         run: pnpx electron-builder --win --publish always
-        working-directory: ./native
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: ./native
 
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v1
