@@ -13,14 +13,21 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v4
 
-      - name: Install Node.js, NPM and Yarn
+      - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: "yarn"
 
+      - name: Install Yarn 1.22.x
+        run: npm install -g yarn@1.22.19
+
       - name: Set up Yarn
         run: yarn config set node-linker hoisted
+
+      - name: Install dependencies in native folder
+        working-directory: ./native
+        run: yarn install
 
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1
