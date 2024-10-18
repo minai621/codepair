@@ -11,58 +11,63 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc src/main.ts --outDir dist",
-    "start": "pnpm run build && cross-env NODE_ENV=production pnpx electron dist/main.js",
-    "start:dev": "pnpm run start:codepair:dev && pnpm run build && cross-env NODE_ENV=development pnpx electron dist/main.js",
-    "start:codepair:dev": "cd ../frontend && Pnpm run dev & ",
-    "electron-builder": "pnpm run build && pnpx electron-builder",
-    "release": "pnpm run build && pnpx electron-builder --publish always"
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "start:dev": "cross-env NODE_ENV=development electron-forge start",
+    "start:codepair:dev": "cd ../frontend && pnpm run dev & "
   },
   "devDependencies": {
+    "@electron-forge/cli": "^7.2.0",
+    "@electron-forge/maker-deb": "^7.2.0",
+    "@electron-forge/maker-rpm": "^7.2.0",
+    "@electron-forge/maker-squirrel": "^7.2.0",
+    "@electron-forge/maker-zip": "^7.2.0",
     "@types/node": "^22.7.6",
     "cross-env": "^7.0.3",
     "electron": "^33.0.1",
-    "electron-builder": "24.6.4",
     "typescript": "^5.3.3"
   },
-  "build": {
-    "publish": {
-      "provider": "github",
-      "releaseType": "draft"
-    },
-    "appId": "com.example.codepair",
-    "productName": "codepair",
-    "files": [
-      "dist/**/*",
-      "node_modules/**/*",
-      "package.json",
-      "!node_modules/**/*.{ts,map}",
-      "!**/*.{iml,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
-      "!.editorconfig",
-      "!**/._*",
-      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,__pycache__,thumbs.db,.gitignore,.gitattributes,.flowconfig,.yarn-metadata.json,.idea,appveyor.yml,.travis.yml,circle.yml,npm-debug.log,.nyc_output,yarn.lock,yarn-error.log}"
-    ],
-    "directories": {
-      "output": "release"
-    },
-    "mac": {
-      "target": "dmg"
-    },
-    "win": {
-      "target": [
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "asar": true
+      },
+      "makers": [
         {
-          "target": "nsis",
-          "arch": [
-            "x64"
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "codepair"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
           ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ],
+      "publishers": [
+        {
+          "name": "@electron-forge/publisher-github",
+          "config": {
+            "repository": {
+              "owner": "minai621",
+              "name": "codepair"
+            },
+            "prerelease": true
+          }
         }
       ]
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true
-    },
-    "linux": {
-      "target": "AppImage"
     }
   }
 }
