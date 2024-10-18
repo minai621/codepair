@@ -77,19 +77,14 @@ jobs:
         working-directory: ./standalone-native
         run: |
           $env:PATH = "C:\Program Files (x86)\NSIS;$env:PATH"
-          $nsisPath = "C:\Program Files (x86)\NSIS\makensis.exe"
+          $nsisPath = "C:\Program Files (x86)\NSIS"
           $configPath = "electron-builder.yml"
           @"
           nsis:
             oneClick: false
             perMachine: false
             allowToChangeInstallationDirectory: true
-          electronBuilder:
-            nsis:
-              makensis:
-                path: $nsisPath
-                arguments:
-                  - -V2
+          npmRebuild: false
           "@ | Out-File -FilePath $configPath -Encoding utf8
 
           # Debug information
@@ -104,4 +99,5 @@ jobs:
           Get-Content $configPath
 
           # Run electron-builder with maximum debug output
+          $env:ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES = "true"
           pnpm electron-builder --win --x64 --publish always --config $configPath
