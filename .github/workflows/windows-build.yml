@@ -1,8 +1,8 @@
 name: electron-windows-nsis-build
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - "**"
 
 jobs:
   release:
