@@ -6,7 +6,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos-latest, windows-2019]
         node-version: [18.x]
 
     steps:
@@ -20,43 +20,9 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
-        with:
-          version: 9.4.0
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install
-
-      - name: Install NSIS (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          choco install nsis -y
-          echo "C:\Program Files (x86)\NSIS" >> $env:GITHUB_PATH
-
-      - name: Verify NSIS installation (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          Get-Command makensis.exe
-          makensis.exe /VERSION
-
-      - name: Clear electron-builder cache (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          Remove-Item -Path "$env:USERPROFILE\AppData\Local\electron-builder\cache" -Recurse -Force -ErrorAction SilentlyContinue
-          Remove-Item -Path "$env:USERPROFILE\.electron-gyp" -Recurse -Force -ErrorAction SilentlyContinue
+        run: pnpm install --prefer-offline --no-frozen-lockfile
 
       - name: Deploy native project
         run: pnpm --filter @codepair/native deploy ./standalone-native
@@ -75,29 +41,4 @@ jobs:
           GH_TOKEN: ${{ secrets.github_token }}
           DEBUG: electron-builder,electron-builder:*
         working-directory: ./standalone-native
-        run: |
-          $env:PATH = "C:\Program Files (x86)\NSIS;$env:PATH"
-          $nsisPath = "C:\Program Files (x86)\NSIS"
-          $configPath = "electron-builder.yml"
-          @"
-          nsis:
-            oneClick: false
-            perMachine: false
-            allowToChangeInstallationDirectory: true
-          npmRebuild: false
-          "@ | Out-File -FilePath $configPath -Encoding utf8
-
-          # Debug information
-          Write-Host "NSIS Path: $nsisPath"
-          Write-Host "PATH environment variable:"
-          $env:PATH -split ';' | ForEach-Object { Write-Host $_ }
-
-          Write-Host "electron-builder version:"
-          pnpm electron-builder --version
-
-          Write-Host "Content of electron-builder.yml:"
-          Get-Content $configPath
-
-          # Run electron-builder with maximum debug output
-          $env:ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES = "true"
-          pnpm electron-builder --win --x64 --publish always --config $configPath
+        run: pnpm run build && pnpx electron-builder --win --x64 --publish always
