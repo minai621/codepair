@@ -40,15 +40,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build native project
-        working-directory: ./native
-        run: pnpm run build
-
       - name: Deploy native project
-        run: pnpm --filter @codepair/native --prod deploy ./standalone-native
+        run: pnpm --filter @codepair/native deploy ./standalone-native
 
       - name: Build/release Electron app
         env:
           GH_TOKEN: ${{ secrets.github_token }}
         working-directory: ./standalone-native
-        run: pnpm electron-builder --publish always
+        run: pnpm run release
