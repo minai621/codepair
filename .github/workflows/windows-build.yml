@@ -31,6 +31,8 @@ jobs:
         run: |
           pnpm run build && pnpx electron-builder --publish always
         working-directory: ./native
+        env:
+          GH_TOKEN: ${{ secrets.github_token }}
 
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v1
