@@ -3,7 +3,10 @@ name: Build and Publish Electron App
 on:
   push:
     branches:
-      - "**"
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
@@ -11,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v4
@@ -23,9 +26,26 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Install electron-forge globally
+        run: pnpm add -g @electron-forge/cli
+
+      - name: Set NODE_PATH
+        run: echo "NODE_PATH=$(pnpm root -g)" >> $GITHUB_ENV
+
+      - name: Clean install
+        run: |
+          rm -rf node_modules
+          pnpm install --force
+        working-directory: ./native
 
       - name: Install dependencies
-        run: pnpm install
+        run: |
+          pnpm install
+          pnpm rebuild
+        working-directory: ./native
 
       - name: Build TypeScript
         run: pnpm run build
@@ -60,7 +80,9 @@ jobs:
           version: 8
 
       - name: Install dependencies
-        run: pnpm install
+        run: |
+          pnpm install
+          pnpm rebuild
         working-directory: ./native
 
       - name: Publish Electron app

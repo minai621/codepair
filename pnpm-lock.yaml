@@ -388,7 +388,7 @@ importers:
       '@electron-forge/cli':
         specifier: ^7.2.0
         version: 7.5.0
-      '@electron-forge/maker-deb':
+      '@electron-forge/core':
         specifier: ^7.2.0
         version: 7.5.0
       '@electron-forge/maker-rpm':
@@ -1757,19 +1757,6 @@ packages:
       '@electron-forge/shared-types': 7.5.0
       fs-extra: 10.1.0
       which: 2.0.2
-    transitivePeerDependencies:
-      - bluebird
-      - supports-color
-    dev: true
-
-  /@electron-forge/maker-deb@7.5.0:
-    resolution: {integrity: sha512-rMXYJzu2LuyDQ5TX4VzQ2OSWDFC7Y1nJpBoyJvXfkA5fF5NNScOFYPv1YzEYAXMcG5hCOVLorsG9HDTEC8uh9g==}
-    engines: {node: '>= 16.4.0'}
-    dependencies:
-      '@electron-forge/maker-base': 7.5.0
-      '@electron-forge/shared-types': 7.5.0
-    optionalDependencies:
-      electron-installer-debian: 3.2.0
     transitivePeerDependencies:
       - bluebird
       - supports-color
@@ -5977,6 +5964,7 @@ packages:
   /author-regex@1.0.0:
     resolution: {integrity: sha512-KbWgR8wOYRAPekEmMXrYYdc7BRyhn2Ftk7KWfMUnQ43hFdojWEFRxhhRUm3/OFEdPa1r0KAvTTg9YQK57xTe0g==}
     engines: {node: '>=0.8'}
+    requiresBuild: true
     dev: true
 
   /axios@1.7.7:
@@ -7125,26 +7113,6 @@ packages:
     dev: true
     optional: true
 
-  /electron-installer-debian@3.2.0:
-    resolution: {integrity: sha512-58ZrlJ1HQY80VucsEIG9tQ//HrTlG6sfofA3nRGr6TmkX661uJyu4cMPPh6kXW+aHdq/7+q25KyQhDrXvRL7jw==}
-    engines: {node: '>= 10.0.0'}
-    os: [darwin, linux]
-    hasBin: true
-    requiresBuild: true
-    dependencies:
-      '@malept/cross-spawn-promise': 1.1.1
-      debug: 4.3.7
-      electron-installer-common: 0.10.3
-      fs-extra: 9.1.0
-      get-folder-size: 2.0.1
-      lodash: 4.17.21
-      word-wrap: 1.2.5
-      yargs: 16.2.0
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-    optional: true
-
   /electron-installer-redhat@3.4.0:
     resolution: {integrity: sha512-gEISr3U32Sgtj+fjxUAlSDo3wyGGq6OBx7rF5UdpIgbnpUvMN4W5uYb0ThpnAZ42VEJh/3aODQXHbFS4f5J3Iw==}
     engines: {node: '>= 10.0.0'}
@@ -8094,13 +8062,6 @@ packages:
       - supports-color
     dev: true
 
-  /gar@1.0.4:
-    resolution: {integrity: sha512-w4n9cPWyP7aHxKxYHFQMegj7WIAsL/YX/C4Bs5Rr8s1H9M1rNtRWRsw+ovYMkXDQ5S4ZbYHsHAPmevPjPgw44w==}
-    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
-    requiresBuild: true
-    dev: true
-    optional: true
-
   /gensync@1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
     engines: {node: '>=6.9.0'}
@@ -8110,16 +8071,6 @@ packages:
     resolution: {integrity: sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==}
     engines: {node: 6.* || 8.* || >= 10.*}
     dev: true
-
-  /get-folder-size@2.0.1:
-    resolution: {integrity: sha512-+CEb+GDCM7tkOS2wdMKTn9vU7DgnKUTuDlehkNJKNSovdCOVxs14OfKCk4cvSaR3za4gj+OBdl9opPN9xrJ0zA==}
-    hasBin: true
-    requiresBuild: true
-    dependencies:
-      gar: 1.0.4
-      tiny-each-async: 2.0.3
-    dev: true
-    optional: true
 
   /get-installed-path@2.1.1:
     resolution: {integrity: sha512-Qkn9eq6tW5/q9BDVdMpB8tOHljX9OSP0jRC5TRNVA4qRc839t4g8KQaR8t0Uv0EFVL0MlyG7m/ofjEgAROtYsA==}
@@ -13200,12 +13151,6 @@ packages:
   /through@2.3.8:
     resolution: {integrity: sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==}
     dev: false
-
-  /tiny-each-async@2.0.3:
-    resolution: {integrity: sha512-5ROII7nElnAirvFn8g7H7MtpfV1daMcyfTGQwsn/x2VtyV+VPiO5CjReCJtWLvoKTDEDmZocf3cNPraiMnBXLA==}
-    requiresBuild: true
-    dev: true
-    optional: true
 
   /tmp-promise@3.0.3:
     resolution: {integrity: sha512-RwM7MoPojPxsOBYnyd2hy0bxtIlVrihNs9pj5SUvY8Zz1sQcQG2tG1hSr8PDxfgEB8RNKDhqbIlroIarSNDNsQ==}
