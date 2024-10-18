@@ -29,7 +29,7 @@ jobs:
 
       - name: Build Electron App and Create NSIS Installer
         run: |
-          pnpm run build && pnpx electron-builder --win --x64 --publish always
+          release --win --x64 --publish always
 
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v1
