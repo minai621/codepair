@@ -40,11 +40,32 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Install NSIS (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install nsis -y
+          echo "C:\Program Files (x86)\NSIS" >> $GITHUB_PATH
+
+      - name: Clear electron-builder cache (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          rm -rf "$env:USERPROFILE\AppData\Local\electron-builder\cache"
+
       - name: Deploy native project
         run: pnpm --filter @codepair/native deploy ./standalone-native
 
-      - name: Build/release Electron app
+      - name: Build/release Electron app (macOS and Linux)
+        if: runner.os != 'Windows'
         env:
           GH_TOKEN: ${{ secrets.github_token }}
         working-directory: ./standalone-native
         run: pnpm run release
+
+      - name: Build/release Electron app (Windows)
+        if: runner.os == 'Windows'
+        env:
+          GH_TOKEN: ${{ secrets.github_token }}
+        working-directory: ./standalone-native
+        run: |
+          $env:PATH += ";C:\Program Files (x86)\NSIS"
+          pnpm run release
