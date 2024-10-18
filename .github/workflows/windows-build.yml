@@ -1,0 +1,48 @@
+name: electron-windows-nsis-build
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install Dependencies
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.4.0 --activate
+          pnpm install
+
+      - name: Install NSIS (Nullsoft Scriptable Install System)
+        if: runner.os == 'Windows'
+        run: |
+          choco install nsis --version=3.0.4.1
+
+      - name: Add NSIS to PATH
+        if: runner.os == 'Windows'
+        run: |
+          echo "C:\Program Files (x86)\NSIS" >> $env:GITHUB_PATH
+
+      - name: Build Electron App and Create NSIS Installer
+        run: |
+          pnpm run build && pnpx electron-builder --win --x64 --publish always
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release/**/*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
