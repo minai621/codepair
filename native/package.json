@@ -48,5 +48,6 @@
     "linux": {
       "target": "AppImage"
     }
-  }
+  },
+  "packageManager": "yarn@1.22.22"
 }
