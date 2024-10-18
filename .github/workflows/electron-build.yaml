@@ -49,7 +49,7 @@ jobs:
       - name: Clear electron-builder cache (Windows)
         if: runner.os == 'Windows'
         run: |
-          rm -rf "$env:USERPROFILE\AppData\Local\electron-builder\cache"
+          Remove-Item -Path "$env:USERPROFILE\AppData\Local\electron-builder\cache" -Recurse -Force -ErrorAction SilentlyContinue
 
       - name: Deploy native project
         run: pnpm --filter @codepair/native deploy ./standalone-native
@@ -67,5 +67,5 @@ jobs:
           GH_TOKEN: ${{ secrets.github_token }}
         working-directory: ./standalone-native
         run: |
-          $env:PATH += ";C:\Program Files (x86)\NSIS"
+          $env:PATH = "$env:PATH;C:\Program Files (x86)\NSIS"
           pnpm run release
