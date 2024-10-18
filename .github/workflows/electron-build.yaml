@@ -17,16 +17,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "yarn"
+          cache: yarn
 
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Install Yarn 1.22.x
-        run: corepack prepare yarn@1.22.19 --activate
-
-      - name: Set up Yarn
-        run: yarn config set node-linker hoisted
+      - name: Prepare Yarn and pnpm with Corepack
+        run: |
+          corepack prepare yarn@1.22.22 --activate
+          corepack prepare pnpm@9.4.0 --activate
 
       - name: Install dependencies in native folder
         working-directory: ./native
