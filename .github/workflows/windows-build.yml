@@ -1,0 +1,79 @@
+name: Build and Publish Electron App
+
+on:
+  push:
+    branches:
+      - "*"
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18.x"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install electron-forge globally
+        run: pnpm add -g @electron-forge/cli
+
+      - name: Set NODE_PATH
+        run: echo "NODE_PATH=$(pnpm root -g)" >> $GITHUB_ENV
+
+      - name: Clean and Install Dependencies
+        run: |
+          pnpm install --force
+          pnpm rebuild
+        working-directory: ./native
+
+      - name: Build TypeScript
+        run: pnpm run build
+        working-directory: ./native
+
+      - name: Make Electron app
+        run: pnpm run make
+        working-directory: ./native
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.os }}-build
+          path: native/out/make/**/*
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18.x"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: macos-latest-build
+          path: ./native/out/make
+
+      - name: Publish Electron app
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm run publish
+        working-directory: ./native
