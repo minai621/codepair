@@ -24,6 +24,9 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
 
+      - name: Install global electron-builder
+        run: npm install -g electron-builder@24.6.4
+
       - name: Check NSIS version
         run: |
           $nsisPath = "C:\Program Files (x86)\NSIS\makensis.exe"
