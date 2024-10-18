@@ -30,15 +30,9 @@ jobs:
       - name: Set NODE_PATH
         run: echo "NODE_PATH=$(pnpm root -g)" >> $GITHUB_ENV
 
-      - name: Clean install
+      - name: Clean and Install Dependencies
         run: |
-          rm -rf node_modules
           pnpm install --force
-        working-directory: ./native
-
-      - name: Install dependencies
-        run: |
-          pnpm install
           pnpm rebuild
         working-directory: ./native
 
@@ -72,11 +66,11 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
-      - name: Install dependencies
-        run: |
-          pnpm install
-          pnpm rebuild
-        working-directory: ./native
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: macos-latest-build
+          path: ./native/out/make
 
       - name: Publish Electron app
         env:
