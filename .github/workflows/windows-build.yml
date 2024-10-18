@@ -28,9 +28,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          corepack enable
           pnpm install --frozen-lockfile --prefer-offline
-          pnpm add -D @types/node @types/electron
 
       - name: Install NSIS (Nullsoft Scriptable Install System)
         if: runner.os == 'Windows'
