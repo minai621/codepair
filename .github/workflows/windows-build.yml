@@ -6,7 +6,7 @@ on:
 
 jobs:
   release:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [18.x]
@@ -20,25 +20,14 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install Dependencies
-        uses: pnpm/action-setup@v2
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 9.4.0
-          run_install: true
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
-          pnpm install --frozen-lockfile --prefer-offline
-
-      - name: Install NSIS (Nullsoft Scriptable Install System)
-        if: runner.os == 'Windows'
-        run: |
-          choco install nsis --version=3.0.4.1 --allow-downgrade
-
-      - name: Add NSIS to PATH
-        if: runner.os == 'Windows'
-        run: |
-          echo "C:\Program Files (x86)\NSIS" >> $env:GITHUB_PATH
+          pnpm install --prefer-offline --no-frozen-lockfile
 
       - name: Build Electron App and Create NSIS Installer
         run: |
