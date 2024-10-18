@@ -13,20 +13,17 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Install Node.js, NPM and Yarn
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "pnpm"
+          cache: "yarn"
 
-      - name: Create .npmrc with node-linker hoisted
-        run: echo "node-linker=hoisted" >> .npmrc
+      - name: Set up Yarn
+        run: yarn config set node-linker hoisted
 
       - name: Build/release Electron app
-        uses: minai621/action-electron-builder@v1
+        uses: samuelmeuli/action-electron-builder@v1
         env:
           DEBUG: electron-builder
         with:
