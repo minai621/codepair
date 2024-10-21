@@ -32,7 +32,7 @@ jobs:
         run: pnpm run build
         working-directory: ./native
 
-      - name: Create NSIS Installer
+      - name: build
         run: pnpx electron-builder --win --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
