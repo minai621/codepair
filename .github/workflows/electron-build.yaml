@@ -1,0 +1,44 @@
+name: electron-build
+on: push
+
+jobs:
+  release:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+        node-version: [18.x]
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+
+      - name: Install dependencies
+        run: pnpm install --prefer-offline --no-frozen-lockfile
+
+      - name: Deploy native project
+        run: pnpm --filter native deploy ./standalone-native
+
+      - name: Build/release Electron app (macOS and Linux)
+        if: runner.os != 'Windows'
+        env:
+          GH_TOKEN: ${{ secrets.github_token }}
+          DEBUG: electron-builder
+        working-directory: ./standalone-native
+        run: pnpm run release
+
+      - name: Build/release Electron app (Windows)
+        if: runner.os == 'Windows'
+        env:
+          GH_TOKEN: ${{ secrets.github_token }}
+          DEBUG: electron-builder,electron-builder:*
+        working-directory: ./standalone-native
+        run: pnpm run build && pnpx electron-builder --win --x64 --publish always

@@ -2,8 +2,11 @@ import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
-import "./App.css";
 import { Box, CssBaseline, ThemeProvider, createTheme, useMediaQuery } from "@mui/material";
+import * as Sentry from "@sentry/react";
+import { QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import axios from "axios";
+import { useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import {
 	RouterProvider,
@@ -13,15 +16,13 @@ import {
 	useLocation,
 	useNavigationType,
 } from "react-router-dom";
-import { useEffect, useMemo } from "react";
-import { selectConfig } from "./store/configSlice";
-import axios from "axios";
-import { routes } from "./routes";
-import { QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import AuthProvider from "./providers/AuthProvider";
-import { useErrorHandler } from "./hooks/useErrorHandler";
-import * as Sentry from "@sentry/react";
+import "./App.css";
 import { useGetSettingsQuery } from "./hooks/api/settings";
+import { useErrorHandler } from "./hooks/useErrorHandler";
+import AuthProvider from "./providers/AuthProvider";
+import { routes } from "./routes";
+import { selectConfig } from "./store/configSlice";
+import { isAxios404Error, isAxios500Error } from "./utils/axios.default";
 
 if (import.meta.env.PROD) {
 	Sentry.init({
@@ -76,9 +77,26 @@ function App() {
 	const queryClient = useMemo(() => {
 		return new QueryClient({
 			queryCache: new QueryCache({
-				onError: handleError,
+				onError: (error) => {
+					if (isAxios404Error(error)) {
+						window.location.href = "/404";
+					} else if (isAxios500Error(error)) {
+						window.location.href = "/404";
+					} else {
+						handleError(error);
+					}
+				},
 			}),
 			defaultOptions: {
+				queries: {
+					retry: (failureCount, error) => {
+						if (axios.isAxiosError(error) && error.response?.status === 401) {
+							return false;
+						}
+
+						return failureCount < 3;
+					},
+				},
 				mutations: {
 					onError: handleError,
 				},

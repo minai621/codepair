@@ -3,22 +3,27 @@ version: "3.8"
 services:
     codepair-backend:
         build:
-            context: ../
+            context: ../../
         environment:
             DATABASE_URL: "mongodb://mongo:27017/codepair"
             # Environment variables need to be passed to the container
+            # You can find the description of each environment variable in the backend/.env.development file
             GITHUB_CLIENT_ID: "your_github_client_id_here"
             GITHUB_CLIENT_SECRET: "your_github_client_secret_here"
             GITHUB_CALLBACK_URL: "http://localhost:3000/auth/login/github"
-            JWT_AUTH_SECRET: "you_should_change_this_secret_key_in_production"
+            JWT_ACCESS_TOKEN_SECRET: "you_should_change_this_access_token_secret_key_in_production"
+            JWT_ACCESS_TOKEN_EXPIRATION_TIME: 86400
+            JWT_REFRESH_TOKEN_SECRET: "you_should_change_this_refresh_token_secret_key_in_production"
+            JWT_REFRESH_TOKEN_EXPIRATION_TIME: 604800
             FRONTEND_BASE_URL: "http://localhost:5173"
             YORKIE_API_ADDR: "http://yorkie:8080"
             YORKIE_PROJECT_NAME: "default"
             YORKIE_PROJECT_SECRET_KEY: ""
             YORKIE_PROJECT_TOKEN: ""
-            YORKIE_INTELLIGENCE: false
+            YORKIE_INTELLIGENCE: "ollama:gemma2:2b"
+            OLLAMA_HOST_URL: http://yorkie-intelligence:11434
             OPENAI_API_KEY: "your_openai_api_key_here"
-            LANGCHAIN_ENDPOINT: "https://www.langchain.com/langsmith"
+            LANGCHAIN_TRACING_V2: "false"
             LANGCHAIN_API_KEY: "your_langsmith_api_key_here"
             LANGCHAIN_PROJECT: "your_langsmith_project_name_here"
             FILE_UPLOAD: false
@@ -33,12 +38,18 @@ services:
             - "yorkie:yorkie"
 
     yorkie:
-        image: "yorkieteam/yorkie:latest"
+        image: "yorkieteam/yorkie:0.5.0"
         command: ["server", "--enable-pprof"]
         restart: always
         ports:
             - "8080:8080"
             - "8081:8081"
+
+    yorkie-intelligence:
+        image: "ollama/ollama:latest"
+        restart: always
+        expose:
+            - "11434"
 
     mongo:
         build:
@@ -50,8 +61,8 @@ services:
             MONGO_REPLICA_PORT: 27017
             MONGO_INITDB_DATABASE: "codepair"
             MONGO_COMMAND: "mongo"
-        ports:
-            - "27017:27017"
+        expose:
+            - "27017"
         restart: unless-stopped
         healthcheck:
             test:
