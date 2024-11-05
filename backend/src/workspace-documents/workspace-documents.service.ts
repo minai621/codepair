@@ -17,6 +17,31 @@ export class WorkspaceDocumentsService {
 		private configService: ConfigService
 	) {}
 
+	async updateTitle(
+		userId: string,
+		workspaceId: string,
+		documentId: string,
+		title: string
+	): Promise<void> {
+		try {
+			await this.prismaService.userWorkspace.findFirstOrThrow({
+				where: {
+					userId,
+					workspaceId,
+				},
+			});
+		} catch (e) {
+			throw new NotFoundException(
+				"The workspace does not exist, or the user lacks the appropriate permissions."
+			);
+		}
+
+		await this.prismaService.document.update({
+			where: { id: documentId },
+			data: { title: title },
+		});
+	}
+
 	async create(userId: string, workspaceId: string, title: string) {
 		try {
 			await this.prismaService.userWorkspace.findFirstOrThrow({
@@ -26,7 +51,9 @@ export class WorkspaceDocumentsService {
 				},
 			});
 		} catch (e) {
-			throw new NotFoundException();
+			throw new NotFoundException(
+				"The workspace does not exist, or the user lacks the appropriate permissions."
+			);
 		}
 
 		return this.prismaService.document.create({
@@ -52,7 +79,9 @@ export class WorkspaceDocumentsService {
 				},
 			});
 		} catch (e) {
-			throw new NotFoundException();
+			throw new NotFoundException(
+				"The workspace does not exist, or the user lacks the appropriate permissions."
+			);
 		}
 
 		const additionalOptions: Prisma.DocumentFindManyArgs = {};
@@ -111,14 +140,16 @@ export class WorkspaceDocumentsService {
 					workspaceId,
 				},
 			});
-
-			return this.prismaService.document.findUniqueOrThrow({
+			const document = await this.prismaService.document.findUniqueOrThrow({
 				where: {
 					id: documentId,
 				},
 			});
+			return document;
 		} catch (e) {
-			throw new NotFoundException();
+			throw new NotFoundException(
+				"The workspace or document does not exist, or the user lacks the appropriate permissions."
+			);
 		}
 	}
 
@@ -146,7 +177,9 @@ export class WorkspaceDocumentsService {
 				},
 			});
 		} catch (e) {
-			throw new NotFoundException();
+			throw new NotFoundException(
+				"The workspace or document does not exist, or the user lacks the appropriate permissions."
+			);
 		}
 
 		const token = generateRandomKey();

@@ -4,8 +4,6 @@ import VerticalSplitIcon from "@mui/icons-material/VerticalSplit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
 	AppBar,
-	Avatar,
-	AvatarGroup,
 	IconButton,
 	Paper,
 	Stack,
@@ -13,79 +11,43 @@ import {
 	ToggleButtonGroup,
 	Toolbar,
 	Tooltip,
-	Popover,
+	Grid2 as Grid,
 	Typography,
-	List,
-	ListItem,
-	ListItemAvatar,
-	ListItemText,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { useList } from "react-use";
-import { ActorID } from "yorkie-js-sdk";
+import { useUserPresence } from "../../hooks/useUserPresence";
 import { EditorModeType, selectEditor, setMode } from "../../store/editorSlice";
 import { selectWorkspace } from "../../store/workspaceSlice";
-import { YorkieCodeMirrorPresenceType } from "../../utils/yorkie/yorkieSync";
+import { ShareRole } from "../../utils/share";
 import DownloadMenu from "../common/DownloadMenu";
 import ShareButton from "../common/ShareButton";
 import ThemeButton from "../common/ThemeButton";
+import UserPresenceList from "./UserPresenceList";
+import { selectDocument } from "../../store/documentSlice";
+import { useUpdateDocumentTitleMutation } from "../../hooks/api/workspaceDocument";
+import { useSnackbar } from "notistack";
 
 function DocumentHeader() {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const editorState = useSelector(selectEditor);
 	const workspaceState = useSelector(selectWorkspace);
-	const [
-		presenceList,
-		{
-			set: setPresenceList,
-			push: pushToPresenceList,
-			removeAt: removePresenceAt,
-			clear: clearPresenceList,
-			filter: filterPresenceList,
-		},
-	] = useList<{
-		clientID: ActorID;
-		presence: YorkieCodeMirrorPresenceType;
-	}>([]);
-
-	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+	const documentStore = useSelector(selectDocument);
+	const { presenceList } = useUserPresence(editorState.doc);
+	const { mutateAsync: updateDocumentTitle } = useUpdateDocumentTitleMutation(
+		workspaceState.data?.id || "",
+		documentStore.data?.id || ""
+	);
+	const isEditingDisabled = Boolean(editorState.shareRole);
+	const { enqueueSnackbar } = useSnackbar();
 
 	useEffect(() => {
-		if (editorState.shareRole === "READ") {
-			dispatch(setMode("read"));
+		if (editorState.shareRole === ShareRole.READ) {
+			dispatch(setMode(EditorModeType.READ));
 		}
 	}, [dispatch, editorState.shareRole]);
-
-	useEffect(() => {
-		if (!editorState.doc) return;
-
-		setPresenceList(editorState.doc.getPresences());
-
-		const unsubscribe = editorState.doc.subscribe("others", (event) => {
-			if (event.type === "watched") {
-				setPresenceList(editorState.doc?.getPresences?.() ?? []);
-			}
-
-			if (event.type === "unwatched") {
-				filterPresenceList((presence) => presence.clientID !== event.value.clientID);
-			}
-		});
-
-		return () => {
-			unsubscribe();
-			clearPresenceList();
-		};
-	}, [
-		editorState.doc,
-		clearPresenceList,
-		pushToPresenceList,
-		removePresenceAt,
-		setPresenceList,
-		filterPresenceList,
-	]);
 
 	const handleChangeMode = (newMode: EditorModeType) => {
 		if (!newMode) return;
@@ -96,114 +58,100 @@ function DocumentHeader() {
 		navigate(`/${workspaceState.data?.slug}`);
 	};
 
-	// Display additional users in a popover when there are more than 4 users
-	const handleOpenPopover = (event: React.MouseEvent<HTMLElement>) => {
-		setAnchorEl(event.currentTarget);
+	const handleUpdateDocumentTitle = async (e: React.FocusEvent<HTMLSpanElement, Element>) => {
+		const title = e.target.textContent as string;
+
+		if (title === documentStore.data?.title) return;
+
+		let errorString = "";
+
+		if (!title.trim()) {
+			errorString = "Title cannot be empty";
+		}
+
+		if (title.length > 255) {
+			errorString = "Title must be less than 255 characters";
+		}
+
+		if (errorString) {
+			enqueueSnackbar(errorString, { variant: "error" });
+			e.target.textContent = documentStore.data?.title as string;
+			return;
+		}
+
+		await updateDocumentTitle({ title });
+		enqueueSnackbar("The title is changed successfully", { variant: "success" });
 	};
-
-	// Display None additional users in a popover when there are more than 4 users
-	const handleClosePopover = () => {
-		setAnchorEl(null);
-	};
-
-	const popoverOpen = Boolean(anchorEl);
-
-	const hiddenAvatars = presenceList.slice(3);
 
 	return (
 		<AppBar position="static" sx={{ zIndex: 100 }}>
 			<Toolbar>
-				<Stack width="100%" direction="row" justifyContent="space-between">
-					<Stack direction="row" spacing={1} alignItems="center">
-						{!editorState.shareRole && (
-							<Tooltip title="Back to Previous Page">
-								<IconButton color="inherit" onClick={handleToPrevious}>
-									<ArrowBackIosNewIcon />
-								</IconButton>
-							</Tooltip>
-						)}
-						<Paper>
-							{editorState.shareRole !== "READ" && (
-								<ToggleButtonGroup
-									value={editorState.mode}
-									exclusive
-									onChange={(_, newMode) => handleChangeMode(newMode)}
-									size="small"
-								>
-									<ToggleButton value="edit" aria-label="edit">
-										<Tooltip title="Edit Mode">
-											<EditIcon />
-										</Tooltip>
-									</ToggleButton>
-									<ToggleButton value="both" aria-label="both">
-										<Tooltip title="Both Mode">
-											<VerticalSplitIcon />
-										</Tooltip>
-									</ToggleButton>
-									<ToggleButton value="read" aria-label="read">
-										<Tooltip title="Read Mode">
-											<VisibilityIcon />
-										</Tooltip>
-									</ToggleButton>
-								</ToggleButtonGroup>
-							)}
-						</Paper>
-						<DownloadMenu />
-					</Stack>
-					<Stack direction="row" alignItems="center" gap={1}>
-						<AvatarGroup max={4} onClick={handleOpenPopover}>
-							{presenceList?.map((presence) => (
-								<Tooltip key={presence.clientID} title={presence.presence.name}>
-									<Avatar
-										alt={presence.presence.name}
-										sx={{ bgcolor: presence.presence.color }}
-									>
-										{presence.presence.name[0]}
-									</Avatar>
+				<Grid container spacing={2} width="100%">
+					<Grid size={4}>
+						<Stack direction="row" spacing={1} alignItems="center">
+							{!editorState.shareRole && (
+								<Tooltip title="Back to Previous Page">
+									<IconButton color="inherit" onClick={handleToPrevious}>
+										<ArrowBackIosNewIcon />
+									</IconButton>
 								</Tooltip>
-							))}
-						</AvatarGroup>
-						<Popover
-							open={popoverOpen}
-							anchorEl={anchorEl}
-							onClose={handleClosePopover}
-							anchorOrigin={{
-								vertical: "bottom",
-								horizontal: "left",
-							}}
-						>
-							<Paper sx={{ padding: 2 }}>
-								<Typography variant="subtitle2">Additional Users</Typography>
-								<List>
-									{hiddenAvatars.map((presence) => (
-										<ListItem key={presence.clientID} sx={{ paddingY: 0.5 }}>
-											<ListItemAvatar>
-												<Avatar
-													sx={{
-														bgcolor: presence.presence.color,
-														width: 24,
-														height: 24,
-														fontSize: 12,
-													}}
-												>
-													{presence.presence.name[0]}
-												</Avatar>
-											</ListItemAvatar>
-											<ListItemText
-												primary={presence.presence.name}
-												primaryTypographyProps={{
-													variant: "body2",
-												}}
-											/>
-										</ListItem>
-									))}
-								</List>
+							)}
+							<Paper>
+								{editorState.shareRole !== ShareRole.READ && (
+									<ToggleButtonGroup
+										value={editorState.mode}
+										exclusive
+										onChange={(_, newMode) => handleChangeMode(newMode)}
+										size="small"
+									>
+										<ToggleButton value="edit" aria-label="edit">
+											<Tooltip title="Edit Mode">
+												<EditIcon />
+											</Tooltip>
+										</ToggleButton>
+										<ToggleButton value="both" aria-label="both">
+											<Tooltip title="Both Mode">
+												<VerticalSplitIcon />
+											</Tooltip>
+										</ToggleButton>
+										<ToggleButton value="read" aria-label="read">
+											<Tooltip title="Read Mode">
+												<VisibilityIcon />
+											</Tooltip>
+										</ToggleButton>
+									</ToggleButtonGroup>
+								)}
 							</Paper>
-						</Popover>
-						{!editorState.shareRole && <ShareButton />}
-						<ThemeButton />
-					</Stack>
-				</Stack>
+							<DownloadMenu />
+						</Stack>
+					</Grid>
+					<Grid size={4}>
+						<Stack alignItems="center" justifyContent="center" height="100%">
+							<Typography
+								contentEditable={!isEditingDisabled}
+								suppressContentEditableWarning={true}
+								sx={{
+									":focus": {
+										outline: "none",
+										border: "none",
+									},
+								}}
+								onBlur={(e) => handleUpdateDocumentTitle(e)}
+								maxWidth={300}
+								noWrap
+							>
+								{documentStore.data?.title}
+							</Typography>
+						</Stack>
+					</Grid>
+					<Grid size={4}>
+						<Stack direction="row" justifyContent="end" gap={1}>
+							<UserPresenceList presenceList={presenceList} />
+							{!editorState.shareRole && <ShareButton />}
+							<ThemeButton />
+						</Stack>
+					</Grid>
+				</Grid>
 			</Toolbar>
 		</AppBar>
 	);
