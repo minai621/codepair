@@ -22,17 +22,18 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Install Dependencies
-        run: pnpm install --prefer-offline --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build Electron App
         run: pnpm run build
+        working-directory: ./native
 
       - name: Build and publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           pnpm run electron-builder --win --publish always --config.asar=false --config.asarUnpack=**
-        shell: powershell
+        working-directory: ./native
 
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v1
