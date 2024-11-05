@@ -6,7 +6,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
         node-version: [18.x]
 
     steps:
@@ -18,27 +18,26 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: pnpm install --prefer-offline --no-frozen-lockfile
 
-      - name: Deploy native project
-        run: pnpm --filter native deploy ./standalone-native
+      - name: Build Electron App
+        run: pnpm run build
 
-      - name: Build/release Electron app (macOS and Linux)
-        if: runner.os != 'Windows'
+      - name: Build and publish
         env:
-          GH_TOKEN: ${{ secrets.github_token }}
-          DEBUG: electron-builder
-        working-directory: ./standalone-native
-        run: pnpm run release
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pnpm run electron-builder --win --publish always --config.asar=false --config.asarUnpack=**
+        shell: powershell
 
-      - name: Build/release Electron app (Windows)
-        if: runner.os == 'Windows'
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ./release/**/*.exe
         env:
-          GH_TOKEN: ${{ secrets.github_token }}
-          DEBUG: electron-builder,electron-builder:*
-        working-directory: ./standalone-native
-        run: pnpm run build && pnpx electron-builder --win --x64 --publish always
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
