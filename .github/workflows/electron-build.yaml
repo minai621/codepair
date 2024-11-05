@@ -32,7 +32,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pnpm run electron-builder --win --publish always --config.asar=false --config.asarUnpack=**
+          pnpm run electron-builder --publish always
         working-directory: ./native
 
       - name: Upload Release Assets
